@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: policygpt-db
+    restart: always
+    environment:
+      POSTGRES_USER: policygpt
+      POSTGRES_PASSWORD: policygpt_password
+      POSTGRES_DB: policygpt_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: policygpt-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: policygpt-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - POSTGRES_SERVER=db
+      - POSTGRES_USER=policygpt
+      - POSTGRES_PASSWORD=policygpt_password
+      - POSTGRES_DB=policygpt_db
+      - REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./backend:/app
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: policygpt-worker
+    command: celery -A app.core.celery_app worker --loglevel=info
+    restart: always
+    depends_on:
+      - db
+      - redis
+    environment:
+      - POSTGRES_SERVER=db
+      - POSTGRES_USER=policygpt
+      - POSTGRES_PASSWORD=policygpt_password
+      - POSTGRES_DB=policygpt_db
+      - REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: policygpt-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
