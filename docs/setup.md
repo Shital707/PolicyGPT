@@ -70,6 +70,13 @@ The frontend is a Vite + React 19 application.
 - Frontend Dashboard: `http://localhost:5173`
 - Backend API Docs (Swagger UI): `http://localhost:8000/docs`
 
-**Default Credentials:**
-- Email: `suraj@123.com`
-- Password: `shital001`
+**Create the Super Admin:**
+
+Run the seed script with credentials supplied via environment variables (never hardcoded):
+
+```powershell
+cd backend
+$env:ADMIN_EMAIL = "admin@example.com"
+$env:ADMIN_PASSWORD = "your-strong-password"
+python seed.py
+```

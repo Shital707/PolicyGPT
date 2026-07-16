@@ -38,4 +38,15 @@ Enterprise AI Business Policy Assistant powered by Google Gemini 2.5 Flash, Fast
    npm install
    npm run dev
    ```
-4. Access the UI at `http://localhost:5173`. Default Admin: `suraj@123.com` / `shital001`.
+4. Access the UI at `http://localhost:5173`.
+
+### Create the Super Admin
+
+Seed the initial admin user by supplying credentials via environment variables (they are never hardcoded):
+
+```powershell
+cd backend
+$env:ADMIN_EMAIL = "admin@example.com"
+$env:ADMIN_PASSWORD = "your-strong-password"
+python seed.py
+```
